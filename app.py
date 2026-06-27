@@ -1,3 +1,5 @@
+import requests
+from bs4 import BeautifulSoup
 import os
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
@@ -56,6 +58,35 @@ def add_todo():
         db.session.commit()
 
     return redirect("/todo")
+
+
+@app.route("/news")
+def news():
+    url = "https://news.ycombinator.com/"
+
+    response = requests.get(url)
+
+    soup = BeautifulSoup(
+        response.text,
+        "html.parser"
+    )
+
+    titles = soup.select(".titleline")
+
+    news_list = []
+
+    for title in titles:
+        main_link = title.find("a")
+
+        news_list.append({
+            "title": main_link.text,
+            "url": main_link["href"]
+        })
+
+    return render_template(
+        "news.html",
+        news_list=news_list
+    )
 
 
 if __name__ == "__main__":
