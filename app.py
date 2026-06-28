@@ -1,9 +1,15 @@
+import os
 import requests
 from bs4 import BeautifulSoup
-import os
+
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+
 
 load_dotenv()
 
@@ -87,6 +93,34 @@ def news():
         "news.html",
         news_list=news_list
     )
+
+
+@app.route("/quotes")
+def quotes():
+    options = Options()
+    options.binary_location = "/usr/bin/chromium"
+    options.add_argument("--headless=new")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+
+    driver = webdriver.Chrome(options=options)
+
+    try:
+        driver.get("https://quotes.toscrape.com/js/")
+
+        quote_elements = driver.find_elements(By.CLASS_NAME, "quote")
+
+        result = "<h1>Quotes</h1>"
+
+        for quote in quote_elements:
+            result += quote.text
+            result += "<hr>"
+
+        return result
+
+    finally:
+        driver.quit()
 
 
 if __name__ == "__main__":

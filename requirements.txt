@@ -2,5 +2,6 @@ flask
 python-dotenv
 Flask-SQLAlchemy
 psycopg2-binary
+selenium
 requests
-bs4
+beautifulsoup4
